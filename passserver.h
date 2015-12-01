@@ -28,7 +28,7 @@ using namespace std;
 	private:
 		string encrypt(const string & str);	
 
-		HashTable<string, string> table;
+		cop4530::HashTable<string, string> table;
 		int currentSize;
 
 	};

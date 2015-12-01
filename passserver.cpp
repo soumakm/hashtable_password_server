@@ -1,38 +1,68 @@
 #include "passserver.h"
-
-PassServer::PassServer(size_t size = 101)
+//check
+PassServer::PassServer(size_t size) : currentSize{ 0 }
 {
-	table = new HashTable(size);
+	cop4530::HashTable<string, string> table(size);
 
 }
 PassServer::~PassServer()
 {
-	delete table;
+	table.clear();
+	currentSize = 0;
 }
 bool PassServer::load(const char *filename)
 {
-	table.load(filename);
+	return table.load(filename);
 }
 
 bool PassServer::addUser(std::pair<string,  string> & kv)
 {
-	table.insert(kv);
-	currentSize++;
+	if(table.insert(make_pair(kv.first, encrypt(kv.second))))
+	{
+		currentSize++;
+		return true;
+	}
+	else
+		return false;
 }
 
 bool PassServer::addUser(std::pair<string, string> && kv)
 {
-	table.insert(kv);
-	currentSize++;
+	
+	if(table.insert(make_pair(kv.first, encrypt(kv.second))))
+	{
+		currentSize++;
+	    return true;
+	}
+	else
+		return false;
 }
 
 bool PassServer::removeUser(const string & k)
 {
-	table.remove(k);
+	if(table.remove(k))
+	{
+		currentSize--;
+		return true;
+	}
+	else
+		return false;
 }
+
 bool PassServer::changePassword(const pair<string, string> &p, const string & newpassword)
 {
-
+	if(!table.contains(p.first))
+		return false;
+	else if (!table.match(p))
+		return false;
+	else if(p.second == newpassword)
+		return false;
+	else
+	{
+		removeUser(p.first);
+		table.insert(make_pair(p.first, encrypt(newpassword)));
+		return true;
+	}
 }
 
 bool PassServer::find(const string & user)
@@ -52,7 +82,11 @@ size_t PassServer::size()
 
 bool PassServer::write_to_file(const char *filename)
 {
-	table.write_to_file();
+	return table.write_to_file(filename);
 }
 
-string ePassServer::ncrypt(const string & str);	
+//change
+string PassServer::encrypt(const string & str)
+{
+	return str;
+}

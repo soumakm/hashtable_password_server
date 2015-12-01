@@ -1,7 +1,7 @@
 
 
 template <typename K, typename V>
-explicit HashTable<K, V>::HashTable(size_t size = 101) : currentSize{ 0 }
+HashTable<K, V>::HashTable(size_t size) : currentSize{ 0 }
       { theLists.resize( prime_below(size) ); }
 
 template <typename K, typename V>
@@ -21,7 +21,7 @@ bool HashTable<K, V>::contains(const K & k)
 }
 
 template <typename K, typename V>
-bool match(const std::pair<K,V> &kv) const  
+bool HashTable<K, V>::match(const std::pair<K,V> &kv) const  
 {
     auto & whichList = theLists[ myhash( kv.first ) ];
     return find( begin( whichList ), end( whichList ), kv ) != end( whichList); 
@@ -32,8 +32,8 @@ template <typename K, typename V>
 bool HashTable<K, V>::insert(const std::pair<K,V> & kv)
 {
     auto & whichList = theLists[ myhash( kv.first ) ];
-    if( std::find_if(whichList.begin(), whichList.end(), [&k](std::pair<K, V> const & elem) 
-      {return elem.first == k;}) != std::end( whichList ))
+    if( std::find_if(whichList.begin(), whichList.end(), [&kv](std::pair<K, V> const & elem) 
+      {return elem.first == kv.first;}) != std::end( whichList ))
       return false;
     
     whichList.push_back( kv );
@@ -49,8 +49,8 @@ template <typename K, typename V>
 bool HashTable<K, V>::insert (std::pair<K,V> && kv)
 {
     auto & whichList = theLists[ myhash( kv.first) ];      
-    if( std::find_if(whichList.begin(), whichList.end(), [&k](std::pair<K, V> const & elem) 
-      {return elem.first == k;}) != std::end( whichList ))
+    if( std::find_if(whichList.begin(), whichList.end(), [&kv](std::pair<K, V> const & elem) 
+      {return elem.first == kv.first;}) != std::end( whichList ))
       return false;
     whichList.push_back( std::move( kv ) );
 
@@ -93,7 +93,7 @@ void HashTable<K, V>::dump()
         for(auto & elem : eachList)
         {
           if(count > 0)
-              std::cout << ":"
+              std::cout << ":";
           std::cout << elem.first << " " <<  elem.second;
           count++;
         }
@@ -107,29 +107,34 @@ bool HashTable<K, V>::load(const char *filename)
     std::string key;
     std::string value; 
     std::string line; 
-    ifstream input_file(filename);
+    std::ifstream input_file(filename);
     
-    if(input_file.open())
+    if(input_file.is_open())
     {
         while ( getline (input_file,line)) 
         {
-            stringstream ss(line);
+            std::stringstream ss(line);
             ss >> key;
             ss >> value;
             insert(make_pair(key, value));  
             currentSize++;
-        }        
+        }   
+        return true;     
     } 
     else
+    {
         std::cout << "Unable to open input file." << std::endl; 
+        return false;
+    }
 }
 
 template <typename K, typename V>
 bool HashTable<K, V>::write_to_file(const char *filename)
 {
-    ofstream out_file(filename);
+    std::ofstream out_file;
+    out_file.open(filename);
 
-    if (out_file.open())
+    if (out_file.is_open())
     {
        for(auto & eachList : theLists)
        {
@@ -138,9 +143,14 @@ bool HashTable<K, V>::write_to_file(const char *filename)
               std::cout << elem.first << " " << elem.second << std::endl;
           }
        }
+       out_file.close();
+       return true;
     }
       else
+      {
         std::cout << "Unable to open output file." << std::endl;
+        return false;
+      }
 }
 
 //private methods
@@ -154,10 +164,10 @@ void HashTable<K, V>::makeEmpty( )
 template <typename K, typename V>
 void HashTable<K, V>::rehash( )
 {
-    vector<list<pair<K,V>>> oldLists = theLists;
+    std::vector<std::list<std::pair<K,V>>> oldLists = theLists;
 
         // Create new double-sized, empty table
-    theLists.resize( nextPrime( 2 * theLists.size( ) ) );
+    theLists.resize( prime_below( 2 * theLists.size( ) ) );
     for( auto & thisList : theLists )
         thisList.clear( );
 
@@ -169,10 +179,10 @@ void HashTable<K, V>::rehash( )
 }
 
 template <typename K, typename V>
-size_t HashTable<K, V>::myhash(const K &k)
+size_t HashTable<K, V>::myhash(const K &k) const
 {
-    static hash<K> hf;
-    return hf( x ) % theLists.size( );
+    static std::hash<K> hf;
+    return hf( k ) % theLists.size( );
 }
 
 // returns largest prime number <= n or zero if input is too large

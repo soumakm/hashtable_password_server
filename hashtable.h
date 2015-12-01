@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+#include <sstream>
+#include <iostream>
 
 
 
@@ -19,8 +21,7 @@ static const unsigned int max_prime = 1301081;
 static const unsigned int default_capacity = 11;
 
 	template <typename K, typename V>
-		class Stack {
-
+		class HashTable {
 		public:
 			explicit HashTable(size_t size = 101);
 			~HashTable();
@@ -38,11 +39,11 @@ static const unsigned int default_capacity = 11;
 		private:
 			void makeEmpty();
 			void rehash();
-			size_t myhash(const K &k);
-			unsigned long prime_below (unsigned long);
-			void setPrimes(vector<unsigned long>&);	
+			size_t myhash(const K &k) const;
+			unsigned long prime_below (unsigned long n);
+			void setPrimes(std::vector<unsigned long>& vprimes);	
 
-			vector<list<pair<K,V>>> theLists;   // The array of Lists
+			std::vector<std::list<std::pair<K,V>>> theLists;   // The array of Lists
 			int  currentSize;
 		};	
 
