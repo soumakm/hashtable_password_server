@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+#include <unistd.h>
+#include <crypt.h>
+#include <cstring>
 #include "hashtable.h"
 
 using namespace std;

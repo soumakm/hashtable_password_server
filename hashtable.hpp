@@ -87,9 +87,11 @@ template <typename K, typename V>
 void HashTable<K, V>::dump()
 {
   int count = 0;
-    for(auto & eachList : theLists)
+    for(int i=0; i<theLists.size();i++)
     {
+        auto & eachList = theLists[i];
         count = 0;
+        std::cout << "v[" << i << "]: ";
         for(auto & elem : eachList)
         {
           if(count > 0)
@@ -97,7 +99,9 @@ void HashTable<K, V>::dump()
           std::cout << elem.first << " " <<  elem.second;
           count++;
         }
-        std::cout << "." << std::endl;
+      //  if(count > 0)
+      //    std::cout << "." ;
+        std::cout << std::endl;
     }
 }
 
@@ -140,7 +144,7 @@ bool HashTable<K, V>::write_to_file(const char *filename)
        {
           for(auto & elem : eachList)
           {
-              std::cout << elem.first << " " << elem.second << std::endl;
+              out_file << elem.first << " " << elem.second << std::endl;
           }
        }
        out_file.close();
@@ -159,6 +163,7 @@ void HashTable<K, V>::makeEmpty( )
 {
     for( auto & thisList : theLists )
         thisList.clear( );
+    theLists.resize(0) ; 
 }
 
 template <typename K, typename V>

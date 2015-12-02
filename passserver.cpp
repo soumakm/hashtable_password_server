@@ -2,7 +2,8 @@
 //check
 PassServer::PassServer(size_t size) : currentSize{ 0 }
 {
-	cop4530::HashTable<string, string> table(size);
+	
+	table = cop4530::HashTable<string, string>(size);
 
 }
 PassServer::~PassServer()
@@ -51,16 +52,19 @@ bool PassServer::removeUser(const string & k)
 
 bool PassServer::changePassword(const pair<string, string> &p, const string & newpassword)
 {
-	if(!table.contains(p.first))
+	pair<string, string> q = make_pair(p.first, encrypt(p.second));
+
+	if(!table.contains(q.first))
 		return false;
-	else if (!table.match(p))
+	else if (!table.match(q))
 		return false;
-	else if(p.second == newpassword)
+	else if(q.second == newpassword)
 		return false;
 	else
 	{
-		removeUser(p.first);
-		table.insert(make_pair(p.first, encrypt(newpassword)));
+		removeUser(q.first);
+		table.insert(q);
+		currentSize++;
 		return true;
 	}
 }
@@ -88,5 +92,11 @@ bool PassServer::write_to_file(const char *filename)
 //change
 string PassServer::encrypt(const string & str)
 {
-	return str;
+	char salt[] = "$1$########";
+	char * password = new char [100];
+   // string password_str;
+
+	strcpy ( password, crypt(str.c_str(), salt));	
+	string password_str(password);
+	return password_str.substr(12);
 }
